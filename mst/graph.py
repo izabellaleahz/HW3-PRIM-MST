@@ -42,3 +42,36 @@ class Graph:
 
         """
         self.mst = None
+        num_nodes = self.adj_mat.shape[0]
+        if num_nodes == 0:
+            self.mst = np.zeros((0, 0))
+            return
+
+        mst = np.zeros_like(self.adj_mat)
+        visited = set([0])
+        edge_heap = []
+
+        for neighbor in range(num_nodes):
+            weight = self.adj_mat[0, neighbor]
+            if neighbor != 0 and weight > 0:
+                heapq.heappush(edge_heap, (weight, 0, neighbor))
+
+        while edge_heap and len(visited) < num_nodes:
+            weight, u, v = heapq.heappop(edge_heap)
+            if v in visited:
+                continue
+            mst[u, v] = weight
+            mst[v, u] = weight
+            visited.add(v)
+
+            for neighbor in range(num_nodes):
+                if neighbor in visited:
+                    continue
+                next_weight = self.adj_mat[v, neighbor]
+                if next_weight > 0:
+                    heapq.heappush(edge_heap, (next_weight, v, neighbor))
+
+        if len(visited) != num_nodes:
+            raise ValueError('Input graph must be connected')
+
+        self.mst = mst
